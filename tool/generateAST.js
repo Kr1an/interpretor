@@ -10,21 +10,31 @@ console.log(baseName);
 console.log(outputDir);
 console.log(types);
 
+defineAST(outputDir, baseName, types);
 
 function defineAST(outputDir, baseName, types) {
-    const filePath = path.join(outputDir, baseName);
-    fs.unlink(filePath);
-    fs.writeFileSync(filePath, `class ${baseName} {
-        constructor(ini) {
-            Object.assign(this, ini);
-        }
+    const filePath = path.join(outputDir, `${baseName}.js`);
+    fs.unlinkSync(filePath);
+    fs.writeFileSync(filePath, 
+`class ${baseName} {
+    constructor(ini) {
+        Object.assign(this, ini);
     }
-    module.exports = {
-        ${types.map(x => ({ name: x, baseName })).map(defineType).join(',\n\t')}
-    }
-    `);
+    accept(visitor) {}
+}
+module.exports = {
+${types.map(x => ({ name: x, baseName })).map(defineType).join(',\n')}
+}`);
 }
 
 function defineType({ name, baseName }) {
-    return `${name}: class extends ${baseName} {}`;
+    return `${name}: class extends ${baseName} {
+    accept(visitor) {
+        return visitor.visit${name}${baseName}(this);
+    }
+}`;
+}
+
+function defineVisitor(baseName, types) {
+    return ``
 }
